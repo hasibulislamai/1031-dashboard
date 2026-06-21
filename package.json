@@ -1,6 +1,6 @@
 {
-  "name": "wealthbuilder-1031",
-  "version": "3.0.0",
+  "name": "wealthbuilder-1031-saas",
+  "version": "4.0.0",
   "private": true,
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
