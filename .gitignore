@@ -1,0 +1,13 @@
+# env file - NEVER commit this
+.env
+.env.local
+.env.production
+
+# dependencies
+node_modules/
+
+# build
+build/
+
+# misc
+.DS_Store
