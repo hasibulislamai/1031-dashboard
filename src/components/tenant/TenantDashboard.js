@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../supabase';
 
-const NAV = ['Dashboard','Deals','Properties','Outreach','Bookings','Settings'];
-const ICONS = {'Dashboard':'📊','Deals':'💼','Properties':'🏢','Outreach':'📧','Bookings':'📅','Settings':'⚙️'};
+const NAV = ['Dashboard','Deals','Properties','Outreach','Reports','Bookings','Settings'];
+const ICONS = {'Dashboard':'📊','Deals':'💼','Properties':'🏢','Outreach':'📧','Reports':'📊','Bookings':'📅','Settings':'⚙️'};
 
 export default function TenantDashboard({ session, tenant: initialTenant }) {
   const [tenant, setTenant] = useState(initialTenant);
@@ -21,13 +21,14 @@ export default function TenantDashboard({ session, tenant: initialTenant }) {
   const [newBooking, setNewBooking] = useState({ client_name:'', client_email:'', booking_date:'', meeting_type:'Consultation', notes:'' });
   const [settings, setSettings] = useState({ hourly_rate: 150, fee_percent: 1, subscription_cost: 500, webhook_outgoing: '', notif_email_deadlines: true });
   const [apiKeys, setApiKeys] = useState([]);
+  const [reports, setReports] = useState([]);
 
   useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
   useEffect(() => { loadAll(); }, []);
 
   async function loadAll() {
     setLoading(true);
-    const [d, p, o, b, s, k] = await Promise.all([
+    const [d, p, o, b, s, k, rep] = await Promise.all([
       supabase.from('ex_deals').select('*').order('created_at', { ascending: false }),
       supabase.from('ex_properties').select('*').limit(20),
       supabase.from('ex_broker_outreach').select('*').order('created_at', { ascending: false }).limit(50),
@@ -41,6 +42,7 @@ export default function TenantDashboard({ session, tenant: initialTenant }) {
     setBookings(b.data || []);
     if (s.data?.[0]) setSettings(prev => ({ ...prev, ...s.data[0] }));
     setApiKeys(k.data || []);
+    setReports(rep.data || []);
     setLoading(false);
   }
 
@@ -313,6 +315,51 @@ export default function TenantDashboard({ session, tenant: initialTenant }) {
           )}
 
           {/* BOOKINGS TAB */}
+          
+          {tab === 'Reports' && (
+            <div style={{padding: '24px'}}>
+              <h2 style={{fontSize: '24px', fontWeight: '700', color: '#fff', marginBottom: '24px'}}>
+                📊 Property Match Reports
+              </h2>
+              {reports.length === 0 ? (
+                <div style={{textAlign: 'center', padding: '60px', background: '#1a1a1a', borderRadius: '16px', border: '1px solid #333'}}>
+                  <p style={{color: '#64748b', fontSize: '16px'}}>No reports yet. Run a property match to generate your first report!</p>
+                </div>
+              ) : (
+                <div style={{display: 'flex', flexDirection: 'column', gap: '32px'}}>
+                  {reports.map((report, index) => (
+                    <div key={report.id} style={{background: '#1a1a1a', borderRadius: '16px', border: '1px solid #333', overflow: 'hidden'}}>
+                      <div style={{padding: '20px 24px', background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <div>
+                          <h3 style={{fontSize: '18px', fontWeight: '700', marginBottom: '4px'}}>
+                            🏢 {report.client_name} - Property Match Report
+                          </h3>
+                          <p style={{fontSize: '13px', opacity: '0.85'}}>
+                            {new Date(report.created_at).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}
+                          </p>
+                        </div>
+                        <span style={{background: 'rgba(255,255,255,0.2)', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600'}}>
+                          #{index + 1}
+                        </span>
+                      </div>
+                      {report.html_report ? (
+                        <iframe
+                          srcDoc={report.html_report}
+                          style={{width: '100%', height: '800px', border: 'none', display: 'block'}}
+                          title={"Report " + (index+1)}
+                          sandbox="allow-same-origin"
+                        />
+                      ) : (
+                        <div style={{padding: '40px', textAlign: 'center', color: '#64748b'}}>
+                          <p>Report is being generated...</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {tab === 'Bookings' && (
             <>
               <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'16px' }}>
@@ -460,3 +507,5 @@ export default function TenantDashboard({ session, tenant: initialTenant }) {
     </div>
   );
 }
+
+
