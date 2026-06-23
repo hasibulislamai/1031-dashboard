@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../supabase';
 
 const NAV = ['Dashboard','Deals','Properties','Outreach','Reports','Bookings','Settings'];
@@ -35,6 +35,7 @@ export default function TenantDashboard({ session, tenant: initialTenant }) {
       supabase.from('wb_bookings').select('*').order('booking_date', { ascending: false }),
       supabase.from('wb_settings').select('*').limit(1),
       supabase.from('wb_api_keys').select('*').eq('revoked', false),
+      supabase.from('ex_match_reports').select('id,client_name,created_at,html_report').order('created_at', { ascending: false }),
     ]);
     setDeals(d.data || []);
     setProperties(p.data || []);
@@ -42,6 +43,7 @@ export default function TenantDashboard({ session, tenant: initialTenant }) {
     setBookings(b.data || []);
     if (s.data?.[0]) setSettings(prev => ({ ...prev, ...s.data[0] }));
     setApiKeys(k.data || []);
+    setReports(r.data || []);
     setReports(rep.data || []);
     setLoading(false);
   }
@@ -507,5 +509,6 @@ export default function TenantDashboard({ session, tenant: initialTenant }) {
     </div>
   );
 }
+
 
 
