@@ -28,7 +28,7 @@ export default function TenantDashboard({ session, tenant: initialTenant }) {
 
   async function loadAll() {
     setLoading(true);
-    const [d, p, o, b, s, k, rep] = await Promise.all([
+    const [d, p, o, b, s, k, r] = await Promise.all([
       supabase.from('ex_deals').select('*').order('created_at', { ascending: false }),
       supabase.from('ex_properties').select('*').limit(20),
       supabase.from('ex_broker_outreach').select('*').order('created_at', { ascending: false }).limit(50),
